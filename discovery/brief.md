@@ -1,47 +1,58 @@
-# Discovery Brief — Weather Widget
+# Weather Widget — Product Requirements Document (50% Draft)
 
 ## 1. Problem
-Users want a quick, at-a-glance weather check for a specific city without loading a full app or website. Developers want a lightweight, embeddable widget they can drop into a demo or portfolio page with minimal setup. No existing solution is both dead-simple to embed and free of framework dependencies.
+
+Developers and students building frontend demos need a self-contained weather widget they can drop into any page without a backend, build tool, or API proxy. Existing solutions either require React/bundlers or carry too many features to serve as a clean learning example. There is no canonical "open in browser, it works" widget.
 
 ## 2. Target Users
-**Primary:** Developers building demo or portfolio pages who need a real, functional widget without a toolchain.
-**Secondary:** Anyone wanting a standalone, browser-openable weather checker for personal use.
 
-## 3. v1 Scope — IN
-- Current temperature (°C)
-- Weather condition text + icon (from OpenWeatherMap)
-- City search by name (text input + Enter key or Search button)
-- Refresh button (re-fetches current city)
-- Default city: London on first load
-- Error state when city is not found or API call fails
-- Single `.html` file — no build step, no framework, opens directly in browser
-- OpenWeatherMap free-tier API; key hardcoded client-side (documented as not secret — each deployer supplies their own key)
+**Primary:** Frontend developers and students who want a self-contained demo component — no build step, no backend dependency.
 
-## 4. v1 Scope — OUT
-- Geolocation / auto-detect city
-- Forecast (hourly or daily)
-- Unit toggle (°C / °F)
-- localStorage persistence for last searched city
+**Secondary:** Anyone who wants a quick weather lookup without installing an app.
+
+## 3. v1 Scope (In)
+
+- Single `.html` file — opens directly in a browser, zero build step
+- Default city: London on first load (never a blank state)
+- City search: text input + Enter key / Search button
+- Current conditions: temperature + weather condition icon
+- Refresh button: re-fetches for the active city
+- Error state: friendly message when city not found or API fails
+- OpenWeatherMap free-tier API, `YOUR_API_KEY_HERE` placeholder with inline comment directing users to swap in their own key
+
+## 4. v1 Scope (Out)
+
+- Geolocation (auto-detect user's city)
+- Multi-day forecast
+- Celsius / Fahrenheit toggle
+- localStorage (remembering last city)
 - Multi-city support
-- Backend API proxy (key is intentionally client-side for v1)
-- Packaging as a reusable component or npm module
+- API key proxy or backend of any kind
+- Any framework or build toolchain (React, Vite, etc.)
 
 ## 5. Key Flows
-1. **First load** — widget renders immediately with London; no blank state.
-2. **City change** — user types a city name, hits Enter or clicks Search; widget fetches and re-renders. Shows error if city not found.
-3. **Refresh** — re-fetches conditions for the current city; same city, fresh data.
+
+*Contributed by Stuart (Engineer)*
+
+1. **First load** — Widget renders immediately with London weather. No blank state on open.
+2. **City change** — User types a city name, presses Enter or clicks Search. Widget fetches and re-renders. Error state shown if city not found.
+3. **Refresh** — Re-fetches current conditions for the active city. Same city, fresh data.
 
 ## 6. Technical Approach
-- Single `.html` file — HTML + CSS + vanilla JS, no build toolchain.
-- OpenWeatherMap Current Weather API (free tier). Key hardcoded in JS — acceptable for a demo widget. Documented clearly in the file so forkers know to swap it.
-- No backend, no proxy, no server required. Open the file in a browser and it works.
-- **Notable risk:** API key is publicly visible in client-side source. Mitigated by: free-tier key with low quota, explicit documentation that this is a demo pattern, out-of-scope for v1 to add a proxy.
+
+*Contributed by Stuart (Engineer)*
+
+- **Stack:** Single `weather.html` — HTML + CSS + vanilla JS, zero dependencies
+- **API:** OpenWeatherMap Current Weather endpoint (free tier)
+- **Key handling:** `YOUR_API_KEY_HERE` placeholder with inline comment. Key is client-side visible — documented as a known limitation for a demo widget, not a bug. Users supply their own free-tier key.
+- **No backend, no proxy** — out of scope by design.
+- **Notable risk:** OpenWeatherMap free tier has rate limits (60 calls/min). Acceptable for a single-user demo; not a concern for v1.
 
 ---
 
-## Sections Requiring Human Input
+## [NEEDS HUMAN INPUT]
 
-- **Success metrics** `[NEEDS HUMAN INPUT]` — what does a successful v1 look like in numbers?
-- **Monetisation / pricing** `[NEEDS HUMAN INPUT]` — open-source? MIT licence? Anything else?
-- **Launch timeline & milestones** `[NEEDS HUMAN INPUT]`
-- **Top business risks & mitigations** `[NEEDS HUMAN INPUT]`
+- **Success metrics** — What does success look like in numbers? (Stars, tutorial adoption, internal use?)
+- **Monetisation / pricing** — Likely N/A for a demo widget — confirm.
+- **Launch timeline & milestones** — Any deadline or target?
+- **Top business risks & mitigations** — Key rotation plan if used beyond demo? Rate limit strategy for production use?
