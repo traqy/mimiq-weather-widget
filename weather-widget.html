@@ -1,242 +1,280 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Weather Widget</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #1a1a2e;
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
       padding: 1rem;
     }
 
     .widget {
-      background: linear-gradient(135deg, #16213e, #0f3460);
-      border-radius: 20px;
+      background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+      border-radius: 1.5rem;
       padding: 2rem;
       width: 100%;
-      max-width: 400px;
-      color: white;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      max-width: 380px;
+      color: #fff;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
     }
 
-    .search {
+    .search-row {
       display: flex;
       gap: 0.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .search input {
-      flex: 1;
-      padding: 0.65rem 1rem;
-      border: none;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-      font-size: 1rem;
-      outline: none;
-    }
-
-    .search input::placeholder { color: rgba(255, 255, 255, 0.5); }
-    .search input:focus { background: rgba(255, 255, 255, 0.22); }
-
-    .search button, .refresh-btn {
-      padding: 0.65rem 1rem;
-      border: none;
-      border-radius: 10px;
-      background: #e94560;
-      color: white;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .search button:hover, .refresh-btn:hover { background: #c73652; }
-
-    .weather-main {
-      text-align: center;
       margin-bottom: 1.5rem;
     }
 
-    .city-name {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      opacity: 0.9;
+    .search-row input {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 2rem;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
     }
 
-    .weather-icon {
-      font-size: 5rem;
-      line-height: 1;
-      margin: 0.5rem 0;
+    .search-row input::placeholder { color: rgba(255,255,255,0.5); }
+    .search-row input:focus { border-color: rgba(255,255,255,0.5); }
+
+    .search-row button {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 2rem;
+      background: #e94560;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .search-row button:hover:not(:disabled) { background: #c73652; }
+    .search-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .weather-card { text-align: center; }
+
+    .city-name {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .condition-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0.5rem auto;
+      display: block;
     }
 
     .temperature {
       font-size: 3.5rem;
-      font-weight: 700;
+      font-weight: 300;
       line-height: 1;
+      margin: 0.25rem 0;
     }
 
-    .condition {
+    .condition-label {
       font-size: 1rem;
-      opacity: 0.75;
-      margin-top: 0.4rem;
+      color: rgba(255,255,255,0.75);
       text-transform: capitalize;
+      margin-bottom: 1.5rem;
     }
 
     .details {
       display: flex;
       justify-content: space-around;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
+      background: rgba(255,255,255,0.08);
+      border-radius: 1rem;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
       font-size: 0.85rem;
     }
 
     .detail-item { text-align: center; }
-    .detail-label { opacity: 0.6; margin-bottom: 0.2rem; }
+    .detail-label { color: rgba(255,255,255,0.6); margin-bottom: 0.2rem; }
     .detail-value { font-weight: 600; }
 
-    .refresh-btn { width: 100%; padding: 0.75rem; }
+    .refresh-btn {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 2rem;
+      background: transparent;
+      color: rgba(255,255,255,0.8);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
 
-    .error {
+    .refresh-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
+    .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error-card {
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .error-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .error-card p { color: rgba(255,255,255,0.75); font-size: 0.95rem; }
+
+    .loading-card {
       text-align: center;
       padding: 2rem 0;
-      color: #e94560;
-      font-size: 0.95rem;
+      color: rgba(255,255,255,0.6);
     }
 
-    .loading {
-      text-align: center;
-      padding: 2rem 0;
-      opacity: 0.6;
-      font-size: 0.95rem;
-    }
-
-    .api-note {
-      margin-top: 1rem;
-      font-size: 0.7rem;
-      opacity: 0.4;
-      text-align: center;
-    }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="widget">
-    <div class="search">
-      <input type="text" id="city-input" placeholder="Enter city…" value="London" />
-      <button onclick="fetchWeather()">Go</button>
+    <div class="search-row">
+      <input type="text" id="city-input" placeholder="Enter city…" autocomplete="off" />
+      <!-- Search button — triggers fetchWeather() with the current input value -->
+      <button id="search-btn" onclick="handleSearch()">Search</button>
     </div>
-    <div id="weather-output">
-      <div class="loading">Loading…</div>
+
+    <div id="loading-card" class="loading-card hidden">Loading…</div>
+
+    <div id="error-card" class="error-card hidden">
+      <div class="error-icon">⚠️</div>
+      <p id="error-msg">Something went wrong.</p>
     </div>
-    <!-- Replace API_KEY below with a free OpenWeatherMap key from https://openweathermap.org/api -->
-    <p class="api-note">API key is a placeholder. Replace API_KEY in source with a free OpenWeatherMap key.</p>
+
+    <div id="weather-card" class="weather-card hidden">
+      <div class="city-name" id="city-display"></div>
+      <img id="condition-icon" class="condition-icon" src="" alt="" />
+      <div class="temperature" id="temperature"></div>
+      <div class="condition-label" id="condition-label"></div>
+      <div class="details">
+        <div class="detail-item">
+          <div class="detail-label">Humidity</div>
+          <div class="detail-value" id="humidity"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Wind</div>
+          <div class="detail-value" id="wind"></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Feels like</div>
+          <div class="detail-value" id="feels-like"></div>
+        </div>
+      </div>
+      <button class="refresh-btn" id="refresh-btn" onclick="refresh()">↻ Refresh</button>
+    </div>
   </div>
 
   <script>
-    // Get a free key at https://openweathermap.org/api (free tier covers current weather).
-    const API_KEY = 'YOUR_OPENWEATHERMAP_API_KEY';
-
-    const CONDITION_ICONS = {
-      Clear: '☀️', Clouds: '☁️', Rain: '🌧️', Drizzle: '🌦️',
-      Thunderstorm: '⛈️', Snow: '❄️', Mist: '🌫️', Fog: '🌫️',
-      Haze: '🌫️', Dust: '🌪️', Sand: '🌪️', Ash: '🌋',
-      Squall: '💨', Tornado: '🌪️',
-    };
+    // API key — replace YOUR_API_KEY_HERE with a valid OpenWeatherMap free-tier key.
+    // Sign up at https://openweathermap.org/api (free plan covers current weather).
+    // NOTE: this key is embedded client-side and visible in page source. Acceptable for
+    // a demo widget; proxy the request server-side to protect the key in production.
+    const API_KEY = 'YOUR_API_KEY_HERE';
+    const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
     let currentCity = 'London';
+    let isFetching = false;
 
-    function conditionIcon(main) {
-      return CONDITION_ICONS[main] || '🌡️';
+    function setLoading() {
+      document.getElementById('loading-card').classList.remove('hidden');
+      document.getElementById('weather-card').classList.add('hidden');
+      document.getElementById('error-card').classList.add('hidden');
     }
 
-    function renderWeather(data) {
-      const icon = conditionIcon(data.weather[0].main);
-      const temp = Math.round(data.main.temp);
-      const feels = Math.round(data.main.feels_like);
-      const humidity = data.main.humidity;
-      const wind = Math.round(data.wind.speed * 3.6); // m/s → km/h
-      const condition = data.weather[0].description;
-      const city = data.name + (data.sys.country ? ', ' + data.sys.country : '');
+    function showWeather(data) {
+      const cityEl       = document.getElementById('city-display');
+      const tempEl       = document.getElementById('temperature');
+      const condEl       = document.getElementById('condition-label');
+      const humEl        = document.getElementById('humidity');
+      const windEl       = document.getElementById('wind');
+      const feelEl       = document.getElementById('feels-like');
+      const iconEl       = document.getElementById('condition-icon');
 
-      document.getElementById('weather-output').innerHTML = `
-        <div class="weather-main">
-          <div class="city-name">${city}</div>
-          <div class="weather-icon">${icon}</div>
-          <div class="temperature">${temp}°C</div>
-          <div class="condition">${condition}</div>
-        </div>
-        <div class="details">
-          <div class="detail-item">
-            <div class="detail-label">Feels like</div>
-            <div class="detail-value">${feels}°C</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Humidity</div>
-            <div class="detail-value">${humidity}%</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">Wind</div>
-            <div class="detail-value">${wind} km/h</div>
-          </div>
-        </div>
-        <button class="refresh-btn" onclick="refresh()">↻ Refresh</button>
-      `;
+      // Use textContent for all API-sourced strings — inherently XSS-safe, no innerHTML.
+      cityEl.textContent  = data.name + ', ' + data.sys.country;
+      tempEl.textContent  = Math.round(data.main.temp) + '\u00b0C';
+      condEl.textContent  = data.weather[0].description;
+      humEl.textContent   = data.main.humidity + '%';
+      windEl.textContent  = Math.round(data.wind.speed) + ' m/s';
+      feelEl.textContent  = Math.round(data.main.feels_like) + '\u00b0C';
+
+      // DOM property assignment for src/alt — safe; browser does not parse these as HTML.
+      iconEl.src = 'https://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png';
+      iconEl.alt = data.weather[0].description;
+
+      document.getElementById('loading-card').classList.add('hidden');
+      document.getElementById('error-card').classList.add('hidden');
+      document.getElementById('weather-card').classList.remove('hidden');
     }
 
-    function renderError(msg) {
-      document.getElementById('weather-output').innerHTML = `
-        <div class="error">${msg}</div>
-        <button class="refresh-btn" onclick="refresh()">↻ Try again</button>
-      `;
+    function showError(msg) {
+      document.getElementById('error-msg').textContent = msg;
+      document.getElementById('loading-card').classList.add('hidden');
+      document.getElementById('weather-card').classList.add('hidden');
+      document.getElementById('error-card').classList.remove('hidden');
+    }
+
+    function setButtons(disabled) {
+      document.getElementById('search-btn').disabled  = disabled;
+      document.getElementById('refresh-btn').disabled = disabled;
     }
 
     async function fetchWeather(city) {
-      const input = document.getElementById('city-input');
-      const target = (city || input.value).trim();
-
-      if (!target) {
-        input.focus();
-        return;
-      }
-
-      currentCity = target;
-      document.getElementById('weather-output').innerHTML = '<div class="loading">Loading…</div>';
-
+      if (isFetching) return; // request lock — prevents concurrent fetches on rapid clicks
+      isFetching = true;
+      setButtons(true);
+      setLoading();
       try {
-        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(target)}&appid=${API_KEY}&units=metric`;
-        const res = await fetch(url);
-
-        if (!res.ok) {
-          renderError('Could not fetch weather. Check the city name or API key.');
+        const url = BASE_URL + '?q=' + encodeURIComponent(city) +
+                    '&units=metric&appid=' + API_KEY;
+        const response = await fetch(url);
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          showError(body.message || 'Request failed (' + response.status + ')');
           return;
         }
-
-        const data = await res.json();
-        renderWeather(data);
-      } catch (_) {
-        renderError('Network error. Check your connection and try again.');
+        const data = await response.json();
+        currentCity = data.name; // canonical name from API, not raw user input
+        showWeather(data);
+      } catch (err) {
+        showError('Network error — check your connection.');
+      } finally {
+        isFetching = false;
+        setButtons(false);
       }
+    }
+
+    function handleSearch() {
+      const input  = document.getElementById('city-input');
+      const target = input.value.trim();
+      if (!target) {
+        input.focus(); // AC-4: empty input is a no-op
+        return;
+      }
+      fetchWeather(target);
     }
 
     function refresh() {
-      fetchWeather(currentCity);
+      fetchWeather(currentCity); // AC-8: refresh uses currentCity, not hardcoded 'London'
     }
 
     document.getElementById('city-input').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') fetchWeather();
+      if (e.key === 'Enter') handleSearch(); // AC-2: Enter key triggers search
     });
 
-    fetchWeather('London');
+    fetchWeather('London'); // AC-1: London on load
   </script>
 </body>
 </html>
