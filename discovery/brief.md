@@ -48,6 +48,14 @@ Developers and students building frontend demos need a self-contained weather wi
 - **No backend, no proxy** — out of scope by design.
 - **Notable risk:** OpenWeatherMap free tier has rate limits (60 calls/min). Acceptable for a single-user demo; not a concern for v1.
 
+## 7. Open Engineering Questions
+
+*Flagged by Mark (QA) — must be resolved during build before QA sign-off*
+
+1. **Empty search input** — What happens when the user hits Search or Enter with an empty field? Options: (a) ignore the action, (b) show an inline validation message, (c) re-fetch the current city. Engineering to pick one and implement consistently.
+2. **401 / non-200 error handling** — The error state must trigger on any non-OK API response (including a 401 from an invalid/placeholder key), not only on network-level exceptions. Ensure `response.ok` is checked before parsing JSON — a bare `catch(e)` will not catch a 401.
+3. **Special character encoding** — City names like São Paulo or Zürich must be URL-encoded in the fetch call. OpenWeatherMap handles them server-side but the JS input must encode before sending.
+
 ---
 
 ## [NEEDS HUMAN INPUT]
