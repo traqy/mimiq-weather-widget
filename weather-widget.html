@@ -108,6 +108,7 @@
 
     .refresh-btn {
       width: 100%;
+      margin-top: 1rem;
       padding: 0.6rem;
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 2rem;
@@ -172,8 +173,10 @@
           <div class="detail-value" id="feels-like"></div>
         </div>
       </div>
-      <button class="refresh-btn" id="refresh-btn" onclick="refresh()">↻ Refresh</button>
     </div>
+
+    <!-- Refresh button lives outside #weather-card so it stays visible during error state (FR-5) -->
+    <button class="refresh-btn hidden" id="refresh-btn" onclick="refresh()">↻ Refresh</button>
   </div>
 
   <script>
@@ -204,11 +207,11 @@
 
       // Use textContent for all API-sourced strings — inherently XSS-safe, no innerHTML.
       cityEl.textContent  = data.name + ', ' + data.sys.country;
-      tempEl.textContent  = Math.round(data.main.temp) + '\u00b0C';
+      tempEl.textContent  = Math.round(data.main.temp) + '°C';
       condEl.textContent  = data.weather[0].description;
       humEl.textContent   = data.main.humidity + '%';
       windEl.textContent  = Math.round(data.wind.speed) + ' m/s';
-      feelEl.textContent  = Math.round(data.main.feels_like) + '\u00b0C';
+      feelEl.textContent  = Math.round(data.main.feels_like) + '°C';
 
       // DOM property assignment for src/alt — safe; browser does not parse these as HTML.
       iconEl.src = 'https://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png';
@@ -217,6 +220,8 @@
       document.getElementById('loading-card').classList.add('hidden');
       document.getElementById('error-card').classList.add('hidden');
       document.getElementById('weather-card').classList.remove('hidden');
+      // Reveal refresh button on first successful fetch; stays visible through subsequent error states.
+      document.getElementById('refresh-btn').classList.remove('hidden');
     }
 
     function showError(msg) {
@@ -224,6 +229,7 @@
       document.getElementById('loading-card').classList.add('hidden');
       document.getElementById('weather-card').classList.add('hidden');
       document.getElementById('error-card').classList.remove('hidden');
+      // Refresh button visibility is intentionally not touched here — FR-5 requires it stays active.
     }
 
     function setButtons(disabled) {
