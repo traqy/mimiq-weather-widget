@@ -122,6 +122,69 @@
     .refresh-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); }
     .refresh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+    .api-key-setup {
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .api-key-setup p {
+      color: rgba(255,255,255,0.65);
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .api-key-setup a {
+      color: #e94560;
+      text-decoration: none;
+    }
+
+    .api-key-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .api-key-row input {
+      flex: 1;
+      padding: 0.5rem 0.9rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 2rem;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+      font-family: monospace;
+    }
+
+    .api-key-row input::placeholder { color: rgba(255,255,255,0.35); }
+    .api-key-row input:focus { border-color: rgba(255,255,255,0.45); }
+
+    .api-key-row button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 2rem;
+      background: #e94560;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .settings-btn {
+      display: block;
+      margin-top: 0.75rem;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.75rem;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      transition: color 0.2s;
+    }
+
+    .settings-btn:hover { color: rgba(255,255,255,0.6); }
+
     .error-card {
       text-align: center;
       padding: 1rem 0;
@@ -177,18 +240,47 @@
 
     <!-- Refresh button lives outside #weather-card so it stays visible during error state (FR-5) -->
     <button class="refresh-btn hidden" id="refresh-btn" onclick="refresh()">↻ Refresh</button>
+
+    <!-- API key setup — shown when no key is saved -->
+    <div id="api-key-setup" class="api-key-setup hidden">
+      <p>Enter your <a href="https://openweathermap.org/api" target="_blank" rel="noopener">OpenWeatherMap</a> API key to get started.<br>Free tier works fine.</p>
+      <div class="api-key-row">
+        <input type="text" id="api-key-input" placeholder="e.g. a1b2c3d4e5f6…" autocomplete="off" spellcheck="false" />
+        <button onclick="saveApiKey()">Save</button>
+      </div>
+    </div>
+
+    <button class="settings-btn hidden" id="settings-btn" onclick="showApiKeySetup()">⚙ change API key</button>
   </div>
 
   <script>
-    // API key — replace YOUR_API_KEY_HERE with a valid OpenWeatherMap free-tier key.
-    // Sign up at https://openweathermap.org/api (free plan covers current weather).
-    // NOTE: this key is embedded client-side and visible in page source. Acceptable for
-    // a demo widget; proxy the request server-side to protect the key in production.
-    const API_KEY = 'YOUR_API_KEY_HERE';
     const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+    const API_KEY_STORAGE = 'owm_api_key';
 
     let currentCity = 'London';
     let isFetching = false;
+
+    function getApiKey() {
+      return localStorage.getItem(API_KEY_STORAGE) || '';
+    }
+
+    function saveApiKey() {
+      const val = document.getElementById('api-key-input').value.trim();
+      if (!val) return;
+      localStorage.setItem(API_KEY_STORAGE, val);
+      document.getElementById('api-key-setup').classList.add('hidden');
+      document.getElementById('settings-btn').classList.remove('hidden');
+      fetchWeather(currentCity);
+    }
+
+    function showApiKeySetup() {
+      document.getElementById('api-key-input').value = getApiKey();
+      document.getElementById('api-key-setup').classList.remove('hidden');
+      document.getElementById('loading-card').classList.add('hidden');
+      document.getElementById('weather-card').classList.add('hidden');
+      document.getElementById('error-card').classList.add('hidden');
+      document.getElementById('refresh-btn').classList.add('hidden');
+    }
 
     function setLoading() {
       document.getElementById('loading-card').classList.remove('hidden');
@@ -238,13 +330,15 @@
     }
 
     async function fetchWeather(city) {
+      const apiKey = getApiKey();
+      if (!apiKey) { showApiKeySetup(); return; }
       if (isFetching) return; // request lock — prevents concurrent fetches on rapid clicks
       isFetching = true;
       setButtons(true);
       setLoading();
       try {
         const url = BASE_URL + '?q=' + encodeURIComponent(city) +
-                    '&units=metric&appid=' + API_KEY;
+                    '&units=metric&appid=' + apiKey;
         const response = await fetch(url);
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
@@ -280,7 +374,14 @@
       if (e.key === 'Enter') handleSearch(); // AC-2: Enter key triggers search
     });
 
-    fetchWeather('London'); // AC-1: London on load
+    document.getElementById('api-key-input').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') saveApiKey();
+    });
+
+    // Show settings btn if key already saved
+    if (getApiKey()) document.getElementById('settings-btn').classList.remove('hidden');
+
+    fetchWeather('London'); // AC-1: London on load — will prompt for key if none saved
   </script>
 </body>
 </html>
